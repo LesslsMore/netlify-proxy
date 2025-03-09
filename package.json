@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "@netlify/functions": "^3.0.1",
+    "axios": "^1.8.2",
     "dotenv": "^16.4.7",
+    "https-proxy-agent": "^7.0.6",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 export const handler = async (event, context) => {
   // 从环境变量获取目标 URL
@@ -18,25 +18,30 @@ export const handler = async (event, context) => {
     console.log(url)
 
     // 转发请求
-    const response = await fetch(url, {
+    const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY
+    const response = await axios(url, {
       method: event.httpMethod,
       headers: event.headers,
-      body: event.body
+      data: event.body,
+      proxy: proxyUrl ? {
+        protocol: proxyUrl.startsWith('https') ? 'https' : 'http',
+        host: new URL(proxyUrl).hostname,
+        port: new URL(proxyUrl).port
+      } : false,
+      httpsAgent: proxyUrl ? new (await import('https-proxy-agent')).HttpsProxyAgent(proxyUrl, {
+        rejectUnauthorized: false
+      }) : null
     })
-
-    
-
-    const body = await response.text()
 
     return {
       statusCode: response.status,
       headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'application/json',
+        'Content-Type': response.headers['content-type'] || 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
       },
-      body
+      body: JSON.stringify(response.data)
     }
   } catch (error) {
     return {
