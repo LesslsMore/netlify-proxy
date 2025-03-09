@@ -1,6 +1,7 @@
-import axios from 'axios';
+const axios = require('axios');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
-export const handler = async (event, context) => {
+exports.handler = async (event, context) => {
   // 从环境变量获取目标 URL
   const targetUrl = process.env.TARGET_URL
 
@@ -28,7 +29,7 @@ export const handler = async (event, context) => {
         host: new URL(proxyUrl).hostname,
         port: new URL(proxyUrl).port
       } : false,
-      httpsAgent: proxyUrl ? new (await import('https-proxy-agent')).HttpsProxyAgent(proxyUrl, {
+      httpsAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl, {
         rejectUnauthorized: false
       }) : null
     })
